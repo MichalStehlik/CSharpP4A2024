@@ -1,4 +1,6 @@
-﻿using TcpChat.Utils;
+﻿using TcpChat.Server;
+using TcpChat.Utils;
 
 // See https://aka.ms/new-console-template for more information
-Console.WriteLine(Utils.GetLocalIPAddress());
+ChatServer server = new();
+server.StartAsync().Wait();

@@ -7,4 +7,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TcpChat.Utils\TcpChat.Utils.csproj" />
+  </ItemGroup>
+
 </Project>

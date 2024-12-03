@@ -1,2 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+using TcpChat.ConsoleClient;
+
+ChatClient client = new();
+client.ConnectAsync().Wait();
