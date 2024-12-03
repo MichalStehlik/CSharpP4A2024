@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TcpChat.Utils;
 
@@ -19,6 +20,7 @@ namespace TcpChat.Server
             if (String.IsNullOrEmpty(ip))
             {
                 ip = Utils.Utils.GetLocalIPAddress();
+                ip = "127.0.0.1";
             }
             _listener = new TcpListener(System.Net.IPAddress.Parse(ip), port);
         }
@@ -37,13 +39,15 @@ namespace TcpChat.Server
 
         private async Task HandleClientAsync(TcpClient client)
         {
+            Console.WriteLine("New client connected");
             var stream = client.GetStream();
-            using var reader = new StreamReader(stream, Encoding.UTF8);
-            using var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
+            using var reader = new StreamReader(stream, new UTF8Encoding(false)); // new UTF8Encoding(false) = Encoding.UTF8 
+            using var writer = new StreamWriter(stream, new UTF8Encoding(false)) { AutoFlush = true };
             string? userName = null;
             try
             {
                 userName = await reader.ReadLineAsync();
+                Console.WriteLine($"New connection from {userName}");
                 if (String.IsNullOrEmpty(userName) || _clients.ContainsKey(userName))
                 {
                     Console.WriteLine($"Invalid or already used username: {userName}");
@@ -52,6 +56,17 @@ namespace TcpChat.Server
                 }
                 _clients.TryAdd(userName, (client, writer));
                 Console.WriteLine($"{userName} joined");
+                string line;
+                while ((line = await reader.ReadLineAsync()) != null)
+                {
+                    var message = JsonSerializer.Deserialize<Message>(line);
+                    if (message == null)
+                    {
+                        Console.WriteLine("Invalid message");
+                        continue;
+                    }
+                    Console.WriteLine($"Received message from {userName}: {message.Content}");
+                }
             }
             catch (Exception ex)
             {
